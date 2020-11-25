@@ -32,9 +32,7 @@ jobs:
     
     - name: Check Lint (black, flake8, isort)
       run: |
-        black --check package/ scripts/
-        flake8 package/ scripts/
-        isort -c package/ scripts
+        make quality
 
   run-test:
     runs-on: ubuntu-latest
@@ -65,7 +63,7 @@ jobs:
     
     - name: Run Test Code
       run: |
-        pytest --cov-branch --cov package
+        pytest --cov-branch --cov korquad_qg
     
     - name: Upload Test Code Coverage
       run: |
