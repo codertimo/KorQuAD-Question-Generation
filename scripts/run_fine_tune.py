@@ -15,6 +15,7 @@ from transformers import GPT2LMHeadModel, get_linear_schedule_with_warmup
 
 from korquad_qg.config import QGConfig
 from korquad_qg.dataset import QGDataset, dynamic_padding_collate_fn, load_korquad_dataset
+from korquad_qg.utils import TQDMHandler
 
 parser = ArgumentParser()
 parser.add_argument("--train-dataset", type=str, help="학습 데이터 경로")
@@ -37,22 +38,20 @@ def main(config: QGConfig):
     torch.manual_seed(config.random_seed)
 
     tokenizer = SentencePieceBPETokenizer.from_file(
-        vocab_filename=config.vocab_path, merges_filename="tokenizer/merges.txt", add_prefix_space=False
+        vocab_filename=config.vocab_path, merges_filename=config.tokenizer_merges_path, add_prefix_space=False
     )
 
     logger.info("loading train dataset")
     train_examples = load_korquad_dataset(config.train_dataset)
     train_dataset = QGDataset(train_examples, tokenizer, config.max_sequence_length)
     train_dataloader = DataLoader(
-        train_dataset, config.train_batch_size, shuffle=True, num_workers=8, collate_fn=dynamic_padding_collate_fn
+        train_dataset, config.train_batch_size, shuffle=True, collate_fn=dynamic_padding_collate_fn
     )
 
     logger.info("loading dev dataset")
     dev_examples = load_korquad_dataset(config.dev_dataset)
     dev_dataset = QGDataset(dev_examples, tokenizer, config.max_sequence_length)
-    dev_dataloader = DataLoader(
-        dev_dataset, config.dev_batch_size, shuffle=True, num_workers=8, collate_fn=dynamic_padding_collate_fn
-    )
+    dev_dataloader = DataLoader(dev_dataset, config.dev_batch_size, collate_fn=dynamic_padding_collate_fn)
 
     # model 생성
     model = GPT2LMHeadModel.from_pretrained(config.gpt_model_hub_name)
@@ -130,7 +129,8 @@ def _create_logger(output_dir: str):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    handler = logging.StreamHandler(sys.stdout)
+    handler = TQDMHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
     logger.addHandler(handler)
     return logger
 

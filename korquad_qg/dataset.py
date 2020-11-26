@@ -1,14 +1,13 @@
-from typing import List, NamedTuple, Tuple, Optional
+import json
+from typing import List, NamedTuple, Optional, Tuple
 
 import torch
 from tokenizers import SentencePieceBPETokenizer
 from torch.utils.data import Dataset
 
-import json
-
-GPTDecodingInputType = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
-GPTInputsType = Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]
-GPTFeaturesType = Tuple[List[int], List[float], List[int], List[int]]
+GPTDecodingInputType = Tuple[torch.Tensor, torch.Tensor]
+GPTInputsType = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+GPTFeaturesType = Tuple[List[int], List[float], List[int]]
 
 
 class QAExample(NamedTuple):
@@ -51,9 +50,8 @@ class QGDataset(Dataset):
 
         labels = input_ids if self.is_train else ([-100] * num_conditional_tokens) + question_tokens
         attention_mask = [1.0] * len(input_ids)
-        token_type_ids = [0] * len(input_ids)
 
-        return input_ids, attention_mask, token_type_ids, labels
+        return input_ids, attention_mask, labels
 
     def __len__(self) -> int:
         return len(self.examples)
@@ -61,20 +59,18 @@ class QGDataset(Dataset):
 
 def dynamic_padding_collate_fn(features: List[GPTFeaturesType]) -> GPTInputsType:
     max_seq_len = max([len(feature[0]) for feature in features])
-    input_ids, attention_mask, token_type_ids, labels = [], [], [], []
+    input_ids, attention_mask, labels = [], [], []
 
     for feature in features:
-        padded_input_ids = input_ids + [0] * (max_seq_len - len(feature[0]))
-        padded_attention_mask = attention_mask + [0.0] * (max_seq_len - len(feature[1]))
-        padded_token_type_ids = token_type_ids + [0] * (max_seq_len - len(feature[2]))
-        padded_labels = labels + [-100] * (max_seq_len - len(feature[3]))
+        padded_input_ids = feature[0] + [0] * (max_seq_len - len(feature[0]))
+        padded_attention_mask = feature[1] + [0.0] * (max_seq_len - len(feature[1]))
+        padded_labels = feature[2] + [-100] * (max_seq_len - len(feature[2]))
 
         input_ids.append(padded_input_ids)
         attention_mask.append(padded_attention_mask)
-        token_type_ids.append(padded_token_type_ids)
         labels.append(padded_labels)
 
-    return torch.tensor(input_ids), torch.tensor(attention_mask), torch.tensor(token_type_ids), torch.tensor(labels)
+    return torch.tensor(input_ids), torch.tensor(attention_mask), torch.tensor(labels)
 
 
 class QGDecodingDataset(QGDataset):
@@ -87,9 +83,8 @@ class QGDecodingDataset(QGDataset):
 
         input_ids = [self.sos_token] + context_tokens + answer_tokens + question_prefix_tokens
         attention_mask = [1.0] * len(input_ids)
-        token_type_ids = [0] * len(input_ids)
 
-        return torch.tensor(input_ids), torch.tensor(attention_mask), torch.tensor(token_type_ids)
+        return torch.tensor(input_ids), torch.tensor(attention_mask)
 
 
 def load_korquad_dataset(dataset_path: str) -> List[QAExample]:
