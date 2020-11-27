@@ -50,7 +50,7 @@ def main(config: QGConfig):
 
     logger.info("loading dev dataset")
     dev_examples = load_korquad_dataset(config.dev_dataset)
-    dev_dataset = QGDataset(dev_examples, tokenizer, config.max_sequence_length)
+    dev_dataset = QGDataset(dev_examples, tokenizer, config.max_sequence_length, is_train=False)
     dev_dataloader = DataLoader(dev_dataset, config.dev_batch_size, collate_fn=dynamic_padding_collate_fn)
 
     # model 생성

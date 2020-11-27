@@ -9,6 +9,9 @@ GPTDecodingInputType = Tuple[torch.Tensor, torch.Tensor]
 GPTInputsType = Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
 GPTFeaturesType = Tuple[List[int], List[float], List[int]]
 
+MAX_QUESTION_SPACE = 32
+MIN_QUESTION_SPACE = 5
+
 
 class QAExample(NamedTuple):
     context: str
@@ -30,6 +33,7 @@ class QGDataset(Dataset):
 
         self.sos_token = tokenizer.token_to_id("<s>")
         self.eos_token = tokenizer.token_to_id("</s>")
+        self.question_prefix_tokens = self.tokenizer.encode("질문:").ids
 
         self.is_train = is_train
 
@@ -38,18 +42,27 @@ class QGDataset(Dataset):
 
         context_tokens = self.tokenizer.encode(f"문맥:{example.context}").ids
         answer_tokens = self.tokenizer.encode(f"정답:{example.answer}").ids
-        question_tokens = self.tokenizer.encode(f"질문:{example.question}").ids
+        question_tokens = self.tokenizer.encode(f"{example.question}").ids
 
-        full_length = len(context_tokens) + len(answer_tokens) + len(question_tokens) + 2
-        if full_length > self.max_sequence_length:
-            available_seq_len = self.max_sequence_length - len(answer_tokens) - len(question_tokens) - 2
+        # [SOS] + 문맥:CONTEXT + 정답:ANSWER + 질문:
+        conditional_tokens_len = 1 + len(context_tokens) + len(answer_tokens) + len(self.question_prefix_tokens)
+        # QUESTION + [EOS]
+        post_tokens_len = len(question_tokens) + 1
+
+        if conditional_tokens_len + post_tokens_len > self.max_sequence_length:
+            available_seq_len = (
+                self.max_sequence_length - conditional_tokens_len - post_tokens_len + len(context_tokens)
+            )
             context_tokens = context_tokens[:available_seq_len]
 
-        input_ids = [self.sos_token] + context_tokens + answer_tokens + question_tokens + [self.eos_token]
-        num_conditional_tokens = len(input_ids) - len(question_tokens) - 1
+        conditional_tokens = [self.sos_token] + context_tokens + answer_tokens + self.question_prefix_tokens
+        post_tokens = question_tokens + [self.eos_token]
+        input_ids = conditional_tokens + post_tokens
 
-        labels = input_ids if self.is_train else ([-100] * num_conditional_tokens) + question_tokens
+        labels = input_ids if self.is_train else ([-100] * len(conditional_tokens)) + post_tokens
         attention_mask = [1.0] * len(input_ids)
+
+        assert len(input_ids) <= self.max_sequence_length
 
         return input_ids, attention_mask, labels
 
@@ -79,9 +92,16 @@ class QGDecodingDataset(QGDataset):
 
         context_tokens = self.tokenizer.encode(f"문맥:{example.context}").ids
         answer_tokens = self.tokenizer.encode(f"정답:{example.answer}").ids
-        question_prefix_tokens = self.tokenizer.encode("질문:").ids
 
-        input_ids = [self.sos_token] + context_tokens + answer_tokens + question_prefix_tokens
+        conditional_tokens_len = 1 + len(context_tokens) + len(answer_tokens) + len(self.question_prefix_tokens)
+        post_tokens_len = MAX_QUESTION_SPACE + 1
+        if conditional_tokens_len + post_tokens_len > self.max_sequence_length:
+            available_seq_len = (
+                self.max_sequence_length - conditional_tokens_len - post_tokens_len + len(context_tokens)
+            )
+            context_tokens = context_tokens[:available_seq_len]
+
+        input_ids = [self.sos_token] + context_tokens + answer_tokens + self.question_prefix_tokens
         attention_mask = [1.0] * len(input_ids)
 
         return torch.tensor(input_ids), torch.tensor(attention_mask)
