@@ -18,10 +18,7 @@ make prepare-dataset
 다음 커맨드를 이용해서 학습을 수행할 수 있습니다.
 
 ```shell
-python -m scripts.run_fine_tune \
-    --train-batch-size 16 \
-    --eval-batch-size 16 \
-    --epochs 5
+python -m scripts.run_fine_tune --train-batch-size 16 --eval-batch-size 16 --epochs 5
 ```
 
 ### 성능 평가 (dev 셋 PPL 측정)
