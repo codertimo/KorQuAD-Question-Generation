@@ -13,6 +13,7 @@ from korquad_qg.dataset import QGDataset, dynamic_padding_collate_fn, load_korqu
 
 parser = ArgumentParser()
 parser.add_argument("-m", "--model-path", type=str, required=True)
+parser.add_argument("-b", "--batch-size", type=int, default=50)
 
 
 def main():
@@ -29,7 +30,7 @@ def main():
     )
     examples = load_korquad_dataset(config.dev_dataset)
     dataset = QGDataset(examples, tokenizer, config.max_sequence_length)
-    dataloader = DataLoader(dataset, batch_size=50, collate_fn=dynamic_padding_collate_fn)
+    dataloader = DataLoader(dataset, batch_size=args.batch_size, collate_fn=dynamic_padding_collate_fn)
 
     model = model.to(device)
     model.eval()

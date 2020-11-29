@@ -23,8 +23,11 @@ parser.add_argument("--dev-dataset", type=str, help="평가 데이터 경로")
 
 parser.add_argument("--epochs", type=int, help="학습 전체를 반복할 횟수")
 parser.add_argument("--lr", type=float, help="learning rate")
+
 parser.add_argument("--train-batch-size", type=int, help="학습에 사용할 배치 크기")
 parser.add_argument("--eval-batch-size", type=int, help="평가에 사용할 배치 크기")
+parser.add_argument("--validation-interval", type=int, help="dev 셋에 대해서 validation 을 수행할 steps")
+parser.add_argument("--save-interval", type=int, help="모델을 저장할 steps")
 
 parser.add_argument("--output-dir", type=str, default="artifacts/", help="모델과 학습 로그를 저장할 경로")
 
