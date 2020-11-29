@@ -48,4 +48,4 @@ python -m scripts.run_generate --model-path $MODEL_PATH --output-path decoded.ts
 
 ## Author
 
-by @codertimo
+by Junseong Kim (Scatter Lab, Pingpong AI) codertimo@gmail.com
