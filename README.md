@@ -24,12 +24,6 @@ python -m scripts.run_fine_tune \
     --epochs 5
 ```
 
-## 학습된 QG 모델 다운로드
-
-- [모델 weight](https://drive.google.com/file/d/1t6ChVQwp3MapJDVEBCnyJcdVurIvn7y7/view?usp=sharing)
-- [학습 로그](https://drive.google.com/file/d/1bMi_AA5nhTt72iEIzcg5gbyN5AYdZxI8/view?usp=sharing)
-
-
 ### 성능 평가 (dev 셋 PPL 측정)
 
 ```shell
@@ -49,6 +43,11 @@ beam-search 를 기반으로 decoding 되었으며, beam_size 는 5를 사용하
 MODEL_PATH = "artifacts/gpt2_xxxxxxxx/gpt2_step_x.pth"
 python -m scripts.run_generate --model-path $MODEL_PATH --output-path decoded.tsv
 ```
+
+### 학습된 QG 모델 다운로드
+
+- [모델 weight](https://drive.google.com/file/d/1t6ChVQwp3MapJDVEBCnyJcdVurIvn7y7/view?usp=sharing)
+- [학습 로그](https://drive.google.com/file/d/1bMi_AA5nhTt72iEIzcg5gbyN5AYdZxI8/view?usp=sharing)
 
 ## Author
 
