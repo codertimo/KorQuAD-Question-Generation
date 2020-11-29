@@ -1,3 +1,4 @@
+import random
 from argparse import ArgumentParser
 
 import torch
@@ -28,7 +29,9 @@ def main():
     tokenizer = SentencePieceBPETokenizer.from_file(
         vocab_filename="tokenizer/vocab.json", merges_filename="tokenizer/merges.txt", add_prefix_space=False
     )
-    examples = load_korquad_dataset(config.dev_dataset)[: args.num_samples]
+    examples = load_korquad_dataset(config.dev_dataset)
+    random.shuffle(examples)
+    examples = examples[: args.num_samples]
     dataset = QGDecodingDataset(examples, tokenizer, config.max_sequence_length)
     dataloader = DataLoader(dataset, batch_size=1)
 

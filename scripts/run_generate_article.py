@@ -7,7 +7,7 @@ from tqdm import tqdm
 from transformers import GPT2LMHeadModel
 
 from korquad_qg.config import QGConfig
-from korquad_qg.dataset import MAX_QUESTION_SPACE, MIN_QUESTION_SPACE, QGDecodingDataset, QAExample
+from korquad_qg.dataset import MAX_QUESTION_SPACE, MIN_QUESTION_SPACE, QAExample, QGDecodingDataset
 
 parser = ArgumentParser()
 parser.add_argument("-m", "--model-path", type=str, required=True)

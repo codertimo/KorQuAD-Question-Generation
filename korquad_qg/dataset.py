@@ -93,7 +93,9 @@ class QGDecodingDataset(QGDataset):
         context_tokens = self.tokenizer.encode(f"문맥:{example.context}").ids
         answer_tokens = self.tokenizer.encode(f"정답:{example.answer}").ids
 
+        # [SOS] + CONTEXT + ANSWER + 정답:
         conditional_tokens_len = 1 + len(context_tokens) + len(answer_tokens) + len(self.question_prefix_tokens)
+        # ANSWER_SEQ + [EOS]
         post_tokens_len = MAX_QUESTION_SPACE + 1
         if conditional_tokens_len + post_tokens_len > self.max_sequence_length:
             available_seq_len = (
