@@ -1,7 +1,6 @@
 import logging
 import math
 import os
-import sys
 from argparse import ArgumentParser
 from datetime import datetime
 
@@ -15,7 +14,7 @@ from transformers import GPT2LMHeadModel, get_linear_schedule_with_warmup
 
 from korquad_qg.config import QGConfig
 from korquad_qg.dataset import QGDataset, dynamic_padding_collate_fn, load_korquad_dataset
-from korquad_qg.utils import TQDMHandler
+from korquad_qg.utils import TqdmLoggingHandler
 
 parser = ArgumentParser()
 parser.add_argument("--train-dataset", type=str, help="학습 데이터 경로")
@@ -132,7 +131,7 @@ def _create_logger(output_dir: str):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    handler = TQDMHandler(sys.stdout)
+    handler = TqdmLoggingHandler()
     handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
     logger.addHandler(handler)
     return logger

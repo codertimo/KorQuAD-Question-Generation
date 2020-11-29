@@ -17,5 +17,5 @@ test:
 
 prepare-dataset:
 	mkdir data
-	wget https://korquad.github.io/dataset/KorQuAD_v1.0_train.json -o data/train.json
-	wget https://korquad.github.io/dataset/KorQuAD_v1.0_dev.json -o data/dev.json
+	wget https://korquad.github.io/dataset/KorQuAD_v1.0_train.json -O data/train.json
+	wget https://korquad.github.io/dataset/KorQuAD_v1.0_dev.json -O data/dev.json

@@ -1,32 +1,23 @@
+"""
+Using TQDM with logging. Code from under link!
+https://stackoverflow.com/questions/38543506/change-logging-print-function-to-tqdm-write-so-logging-doesnt-interfere-wit
+"""
+
 import logging
-import sys
-from typing import Optional, TextIO
 
 import tqdm
 
 
-class TQDMHandler(logging.Handler):
-    def __init__(self, stream: Optional[TextIO] = None):
-        super().__init__()
-        if stream is None:
-            stream = sys.stdout
+class TqdmLoggingHandler(logging.Handler):
+    def __init__(self, level=logging.NOTSET):
+        super().__init__(level)
 
-        self.stream = stream
-
-    def flush(self):
-        self.acquire()
+    def emit(self, record):
         try:
-            if self.stream and hasattr(self.stream, "flush"):
-                self.stream.flush()
-        finally:
-            self.release()
-
-    def emit(self, record: logging.LogRecord):
-        try:
-            message = self.format(record)
-            tqdm.tqdm.write(message, self.stream)
+            msg = self.format(record)
+            tqdm.tqdm.write(msg)
             self.flush()
-        except RecursionError:  # see https://github.com/python/cpython/blob/a62ad4730c9b575f140f24074656c0257c86a09a/Lib/logging/__init__.py#L1086
+        except (KeyboardInterrupt, SystemExit):
             raise
         except Exception:
             self.handleError(record)
