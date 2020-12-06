@@ -3,7 +3,9 @@ from typing import NamedTuple
 
 class QGConfig(NamedTuple):
     train_dataset: str = "data/train.json"
+    article_domain_train_dataset: str = "data/train_article.json"
     dev_dataset: str = "data/dev.json"
+    article_domain_dev_dataset: str = "data/valid.json"
 
     gpt_model_hub_name: str = "taeminlee/kogpt2"
     vocab_path: str = "tokenizer/vocab.json"
