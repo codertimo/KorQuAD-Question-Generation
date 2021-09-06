@@ -14,7 +14,7 @@ class QGConfig(NamedTuple):
     epochs: int = 5
     lr: float = 5e-5
     train_batch_size: int = 16
-    dev_batch_size: int = 16
+    eval_batch_size: int = 16
 
     output_dir: str = "outputs/"
 
